@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>テンプレートを自分のGitHubリポジトリにする手順</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1f2430;
+    line-height: 1.7;
+    font-size: 13.5px;
+    margin: 0;
+  }
+  h1 {
+    font-size: 21px;
+    margin: 0 0 4px;
+    color: #16324f;
+    border-bottom: 3px solid #16324f;
+    padding-bottom: 10px;
+  }
+  .subtitle {
+    color: #5b6b7c;
+    font-size: 12px;
+    margin: 0 0 22px;
+  }
+  h2 {
+    font-size: 15px;
+    color: #16324f;
+    margin: 22px 0 8px;
+    padding: 5px 10px;
+    background: #eef3f7;
+    border-left: 4px solid #2f7cb0;
+  }
+  h3 {
+    font-size: 13.5px;
+    color: #16324f;
+    margin: 14px 0 6px;
+  }
+  ol, ul { margin: 6px 0 10px 0; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  code, pre {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  pre {
+    background: #1f2430;
+    color: #e8edf3;
+    padding: 10px 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 8px 0 10px;
+    line-height: 1.5;
+  }
+  code:not(pre code) {
+    background: #eef1f5;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .note {
+    background: #fff8ec;
+    border-left: 4px solid #d69a2d;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 12.5px;
+  }
+  .goal {
+    background: #eef7ee;
+    border-left: 4px solid #3f8f4f;
+    padding: 8px 12px;
+    margin: 10px 0 4px;
+    font-size: 12.5px;
+  }
+  .goal strong { color: #2c6b39; }
+  .footer {
+    margin-top: 26px;
+    padding-top: 10px;
+    border-top: 1px solid #d7dee5;
+    font-size: 11px;
+    color: #8b98a5;
+  }
+  a { color: #2f7cb0; }
+</style>
+</head>
+<body>
+
+<h1>テンプレートを自分のGitHubリポジトリにする手順</h1>
+<p class="subtitle">長期インターン選考プログラム デモシステム開発課題 ／ このガイドはリポジトリのREADMEを開く前、ZIPファイルを受け取った直後に行う</p>
+
+<h2>0. あらかじめインストールするツール</h2>
+<p>Gitの設定やZIP展開に入る前に、以下を用意する。</p>
+<ul>
+  <li>エディタは<a href="https://code.visualstudio.com/download">VS Code</a>を推奨。使い慣れたエディタがあればそちらでも構わない（DevContainerでの起動に対応していること）</li>
+  <li>Windowsの場合、この後インストールするDocker DesktopはバックグラウンドでWSL2（Windows Subsystem for Linux）を利用する。インストール時にWSL2のセットアップを求められたら案内に従う（詳細: <a href="https://docs.docker.com/desktop/wsl/">Docker DesktopのWSL2バックエンド</a>）</li>
+  <li>AIコーディング支援は<strong>Claude Codeを、弊社発行のAPIキー経由で使用する</strong>（手順は下記）</li>
+  <li>課題内のAI機能（問い合わせへの一次回答など）を実装する際は、<a href="https://ai.google.dev/pricing">Gemini API</a>の無料枠などを利用する（追加コストなく実装できる）</li>
+</ul>
+
+<h3>Claude Code（弊社発行APIキー）のセットアップ</h3>
+<p>個人のClaude有料プランへのログインは不要。インターン担当者から共有するAPIキーを環境変数に設定して使う。</p>
+<ol>
+  <li>
+    <strong>Claude Codeをインストールする</strong>（公式手順: <a href="https://code.claude.com/docs/en/quickstart">Quickstart</a>）
+    <p>macOS / Linux / WSL:</p>
+    <pre>curl -fsSL https://claude.ai/install.sh | bash</pre>
+    <p>Windows（PowerShell）:</p>
+    <pre>irm https://claude.ai/install.ps1 | iex</pre>
+    <p>インストール後、ターミナルを開き直して確認する。</p>
+    <pre>claude --version</pre>
+  </li>
+  <li>
+    <strong>インターン担当者からAPIキーを受け取る</strong>
+    <p>選考プログラム参加後、担当者からAPIキー（<code>sk-ant-...</code> 形式）が共有される。自分でClaude Consoleから発行する必要はない。</p>
+  </li>
+  <li>
+    <strong>環境変数 <code>ANTHROPIC_API_KEY</code> に設定する</strong>
+    <p>以下のコマンドの <code>共有されたAPIキー</code> を実際の値に置き換えて実行する。</p>
+    <p>macOS（zsh）:</p>
+    <pre>echo 'export ANTHROPIC_API_KEY="共有されたAPIキー"' &gt;&gt; ~/.zshrc
+source ~/.zshrc</pre>
+    <p>Linux / WSL（bash）:</p>
+    <pre>echo 'export ANTHROPIC_API_KEY="共有されたAPIキー"' &gt;&gt; ~/.bashrc
+source ~/.bashrc</pre>
+    <p>Windowsの場合は「システムのプロパティ」→「環境変数」→ユーザー環境変数に新規追加する。</p>
+    <ul>
+      <li>変数名: <code>ANTHROPIC_API_KEY</code></li>
+      <li>変数値: 共有されたAPIキー</li>
+    </ul>
+    <p>設定後はターミナル（またはPowerShell）を開き直す。</p>
+  </li>
+  <li>
+    <strong>動作確認する</strong>
+    <p>キーの値は表示せず、設定されていることだけを確認する。</p>
+    <p>macOS / Linux / WSL:</p>
+    <pre>[ -n "$ANTHROPIC_API_KEY" ] &amp;&amp; echo "ANTHROPIC_API_KEY is set" || echo "ANTHROPIC_API_KEY is not set"</pre>
+    <p>Windows（PowerShell）:</p>
+    <pre>if ($env:ANTHROPIC_API_KEY) { 'ANTHROPIC_API_KEY is set' } else { 'ANTHROPIC_API_KEY is not set' }</pre>
+    <p>その後 <code>claude</code> を起動する。キーが設定されていれば、個人アカウントへのログインを求められず、APIキー利用の確認が出る。対話内で <code>/status</code> を実行し、認証方式がAPIキーになっていることを確認する。</p>
+  </li>
+</ol>
+<div class="note">
+  <strong>注意</strong>
+  <ul>
+    <li>APIキーは第三者に見せない・GitHubにコミットしない（チャット・スクショへの貼り付けも避ける）</li>
+    <li>個人のClaude Pro / Maxプランでログインしない。必ず弊社発行のAPIキー（環境変数）を使う</li>
+    <li>キーが届いていない・動かない場合はインターン担当者へ連絡する</li>
+  </ul>
+</div>
+<div class="goal"><strong>ゴール:</strong> <code>claude --version</code> が表示され、<code>ANTHROPIC_API_KEY</code> が設定された状態で <code>claude</code> が起動できる。</div>
+
+<h2>1. 事前に用意するもの</h2>
+<ul>
+  <li><a href="https://git-scm.com/downloads">Git</a>（Windowsの場合、インストール時に一緒に入る「Git Bash」をターミナルとして使うのがおすすめ）</li>
+  <li><a href="https://github.com/join">GitHubアカウント</a>（すでに持っていればそれを使う）</li>
+</ul>
+<div class="goal"><strong>ゴール:</strong> ターミナルで <code>git --version</code> を実行してバージョンが表示される。かつGitHubに自分のアカウントでログインできる。</div>
+
+<h2>2. ZIPファイルを展開する</h2>
+<p>受け取ったZIPファイルをダブルクリックして展開し、わかりやすい場所（デスクトップなど）に置く。</p>
+
+<h2>3. 自分のGitリポジトリとして初期化する</h2>
+<p>展開したフォルダをターミナルで開き、以下を実行する。</p>
+<pre>cd &lt;展開したフォルダ&gt;
+git init
+git add -A
+git commit -m "chore: initial commit"</pre>
+<div class="note">初めてGitを使う場合は、<code>git commit</code>の前に一度だけ以下を実行して自分の名前とメールアドレスを設定しておく。</div>
+<pre>git config --global user.name "自分の名前"
+git config --global user.email "自分のメールアドレス"</pre>
+
+<h2>4. GitHubで新しいリポジトリを作成する</h2>
+<ol>
+  <li><a href="https://github.com/new">github.com/new</a> を開く</li>
+  <li>Repository name を入力する（例: <code>my-intern-assignment</code>）</li>
+  <li>Public を指定すること</li>
+  <li><strong>README・.gitignore・ライセンスは追加しない</strong>（チェックを入れない）。追加すると、次の手順のpushで履歴がぶつかってしまう</li>
+  <li>「Create repository」を押す</li>
+</ol>
+
+<h2>5. 作成したリポジトリにpushする</h2>
+<p>作成後の画面に表示されるリポジトリのURL（<code>https://github.com/自分のアカウント名/リポジトリ名.git</code>）を使い、ターミナルで以下を実行する。</p>
+<pre>git remote add origin &lt;作成したリポジトリのURL&gt;
+git branch -M main
+git push -u origin main</pre>
+<div class="note">
+  初回push時にログインを求められることがある。GitHubはパスワードでの認証を廃止しているため、以下のどちらかで認証する。
+  <ul>
+    <li><a href="https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">Personal Access Token</a>を作成し、パスワード欄に貼り付ける</li>
+    <li><a href="https://cli.github.com/">GitHub CLI</a>をインストールし、<code>gh auth login</code>でブラウザ経由で認証する（迷ったらこちらがおすすめ）</li>
+  </ul>
+</div>
+
+<div class="goal"><strong>ゴール:</strong> 自分のGitHubアカウント上に、このテンプレートの中身が入ったリポジトリができている。ブラウザでそのリポジトリを開き、ファイル一覧と <code>README.md</code> が表示されればOK。</div>
+
+<h2>次にやること</h2>
+<p>ここまで完了したら、GitHub上の自分のリポジトリを開き、<code>README.md</code>の案内に沿ってローカル環境を起動する（Docker Desktopのインストール、DevContainerでの起動）。</p>
+
+<div class="footer">intern-web-app-assignment-template-2026-summer セットアップガイド</div>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    volumes:
+      - .:/workspace
+      - node_modules:/workspace/frontend/app/node_modules
+      - ./frontend/environments:/workspace/frontend/app/environments
+    working_dir: /workspace/frontend/app
+    ports:
+      - '3000:3000'
+      - '6006:6006'
+    env_file:
+      - ./frontend/environments/.env.local
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - TZ=Asia/Tokyo
+      - NODE_ENV=${NODE_ENV:-development}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    tty: true
+    stdin_open: true
+    init: true
+volumes:
+  node_modules:

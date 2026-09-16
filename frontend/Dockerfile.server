@@ -1,0 +1,55 @@
+FROM node:24-bookworm-slim AS deps
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@10.11.0 --activate
+COPY app/package.json app/pnpm-lock.yaml app/.npmrc ./
+RUN pnpm install --frozen-lockfile
+
+FROM node:24-bookworm-slim AS builder
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable && corepack prepare pnpm@10.11.0 --activate
+COPY --from=deps /app/node_modules ./node_modules
+COPY app/ ./
+
+# 環境変数ファイルをコピー（存在しない場合は空ファイルを作成）
+COPY .env.build* ./
+RUN if [ ! -f ./.env.build ]; then \
+      echo "# No build environment variables" > ./.env.build; \
+    fi
+
+# 環境変数ファイルを読み込んでビルド時に利用可能にする
+RUN if [ -f ./.env.build ]; then \
+      echo "=== Loading .env.build file ===" && \
+      cat ./.env.build && \
+      echo "=== Setting environment variables ===" && \
+      if [ -s ./.env.build ]; then \
+        export $(cat ./.env.build | grep -v '^#' | grep -v '^$' | xargs) && \
+        env | grep -E '^NEXT_PUBLIC_' || echo "No NEXT_PUBLIC_ variables found"; \
+      else \
+        echo "Empty .env.build file"; \
+      fi; \
+    else \
+      echo "No .env.build file found"; \
+    fi
+
+# 環境変数ファイルを読み込んでからビルド実行
+RUN if [ -f ./.env.build ] && [ -s ./.env.build ]; then \
+      export $(cat ./.env.build | grep -v '^#' | grep -v '^$' | xargs); \
+    fi && pnpm build
+
+FROM node:24-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+
+RUN groupadd -r nextjs && useradd -r -g nextjs nextjs
+
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+USER nextjs
+EXPOSE 3000
+CMD ["node", "server.js"]

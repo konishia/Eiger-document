@@ -1,0 +1,4 @@
+# local env files（.env.local はローカル専用のダミー値のみのため committed）
+environments/.env.*
+!environments/.env.example
+!environments/.env.local

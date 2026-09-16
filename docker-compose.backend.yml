@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    volumes:
+      - ~/.aws:/root/.aws:ro
+      - .:/workspace
+      - /workspace/backend/app/.venv
+      - ./backend/environments:/workspace/backend/app/environments
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/environments/.env.local
+    environment:
+      - TZ=Asia/Tokyo
+    depends_on:
+      db:
+        condition: service_started
+
+  db:
+    image: mysql:8.0
+    container_name: backend-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_DATABASE: "database"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "password"
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:

@@ -1,0 +1,18 @@
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.coverage
+coverage.xml
+
+# Python パッケージビルド成果物
+*.egg-info/
+build/
+dist/
+
+# 環境設定ファイル
+.env.*
+
+# 自動生成されるREADME（手動作成の場合は削除）
+README.md
