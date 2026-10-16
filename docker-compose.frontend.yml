@@ -7,6 +7,9 @@ services:
     volumes:
       - .:/workspace
       - node_modules:/workspace/frontend/app/node_modules
+      # 開発サーバーの一時ファイル（.next）は Docker のボリュームに置き、OneDrive などの同期フォルダに書き込まない
+      # （同期ソフトが一時ファイルを複製・ロックすると、画面が 404 になったり起動できなくなったりするため）
+      - next_cache:/workspace/frontend/app/.next
       - ./frontend/environments:/workspace/frontend/app/environments
     working_dir: /workspace/frontend/app
     ports:
@@ -25,3 +28,4 @@ services:
     init: true
 volumes:
   node_modules:
+  next_cache:

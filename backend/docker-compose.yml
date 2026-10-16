@@ -15,6 +15,9 @@ services:
       - "8000:8000"
     env_file:
       - ./environments/.env.local
+      # Claude APIキー（任意・Git管理外）。無い場合はキーワード簡易判定で動く
+      - path: ./environments/.env.secret
+        required: false
     environment:
       - ENVIRONMENT=local
       - TZ=Asia/Tokyo
@@ -24,6 +27,8 @@ services:
   db:
     image: mysql:8.0
     container_name: backend-db
+    # 日時を日本時間で記録する
+    command: --default-time-zone=+09:00
     ports:
       - "3306:3306"
     environment:

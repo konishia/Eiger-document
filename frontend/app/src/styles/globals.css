@@ -1,1 +1,174 @@
 @import 'tailwindcss';
+
+/*
+ * カラーパレット（水色と白をベースにした寒色系）
+ * ほんのり青みのある白の背景に、水色・アクア・ミント・ラベンダー・ペリウィンクルを合わせ、やわらかい印象にする
+ * 文字色やボタンの白文字は、背景に対して十分なコントラスト（WCAG AA 以上）になるようにしている
+ */
+:root {
+  color-scheme: light;
+  --base: #f7fbfe;
+  --card: #ffffff;
+  --sunken: #eef5fa;
+  --line: #dce8f1;
+  --ink: #26384a;
+  --muted: #5a6c7e;
+  --primary: #3777ad;
+  --primary-hover: #2d6797;
+  --on-primary: #ffffff;
+  --primary-soft: #e2f0fa;
+  --accent: #5a6ecb;
+  --accent-soft: #e8ebfb;
+  --accent-ink: #45549f;
+  --info-soft: #dcf1f6;
+  --info-ink: #2a6575;
+  --warn-soft: #dff3ec;
+  --warn-ink: #2c6a55;
+  --danger: #c2505a;
+  --danger-soft: #fbe6ea;
+  --ai-soft: #eeeafb;
+  --ai-ink: #5c4ea0;
+  --shadow: 0 1px 2px rgb(38 56 74 / 0.04), 0 6px 20px rgb(55 119 173 / 0.08);
+}
+
+@theme inline {
+  --color-base: var(--base);
+  --color-card: var(--card);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-info-soft: var(--info-soft);
+  --color-info-ink: var(--info-ink);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-ink: var(--warn-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ai-soft: var(--ai-soft);
+  --color-ai-ink: var(--ai-ink);
+  --shadow-soft: var(--shadow);
+}
+
+@theme {
+  /* ゴシック体（読み込めない環境では端末のゴシック体） */
+  --font-sans:
+    'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'BIZ UDPGothic', 'Yu Gothic', 'Meiryo', sans-serif;
+
+  --animate-fade-up: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.25s ease-out both;
+  --animate-pop-in: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-base font-sans text-ink antialiased;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+  ::selection {
+    background: var(--primary-soft);
+  }
+  :focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* ボタン: 角を丸く、押すと少し沈む */
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold whitespace-nowrap transition duration-200 ease-out select-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-primary text-on-primary shadow-soft hover:bg-primary-hover;
+  }
+  .btn-accent {
+    @apply bg-accent text-white shadow-soft hover:brightness-105;
+  }
+  .btn-soft {
+    @apply bg-primary-soft text-ink hover:brightness-95;
+  }
+  .btn-ghost {
+    @apply text-muted hover:bg-sunken hover:text-ink;
+  }
+  .btn-sm {
+    @apply px-4 py-1.5 text-xs;
+  }
+
+  .card {
+    @apply rounded-3xl border border-line bg-card p-6 shadow-soft sm:p-8;
+  }
+
+  .input {
+    @apply w-full rounded-2xl border border-line bg-card px-4 py-3 text-ink transition duration-200 placeholder:text-muted/70 focus:border-primary focus:ring-4 focus:ring-primary-soft focus:outline-none;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold whitespace-nowrap;
+  }
+
+  .page {
+    @apply mx-auto w-full max-w-3xl animate-fade-up px-5 py-10 sm:py-14;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold tracking-wide sm:text-3xl;
+  }
+
+  .link {
+    @apply font-bold text-primary underline-offset-4 transition hover:underline;
+  }
+}
+
+/* 動きを減らす設定の端末ではアニメーションを止める */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

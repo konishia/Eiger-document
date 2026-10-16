@@ -11,7 +11,7 @@ from alembic import context
 
 # プロジェクトの設定とモデルをインポート
 from database import DATABASE_URL, Base
-from models import SampleModel  # noqa: F401 -- autogenerate用にモデルを読み込む
+import models  # noqa: F401 -- autogenerate用にモデルを読み込む
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
